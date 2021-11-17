@@ -1,0 +1,4 @@
+# Folder section
+.idea
+venv
+__pycache__
