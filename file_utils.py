@@ -25,11 +25,10 @@ def _read_files_from_dir(file_list, dir_path, supported_formats, recursive):
 
 def read_dcm_image(img_path):
     ds = dcmread(img_path)
-    print(ds.DicomDictionary)
     return Image.fromarray(ds.pixel_array)
 
 
-def read_dcm_image_as_preview(img_path, selected=False):
+def read_dcm_image_as_preview(img_path):
     img = read_dcm_image(img_path)
     base_width, base_height = img.size
 
@@ -38,12 +37,10 @@ def read_dcm_image_as_preview(img_path, selected=False):
 
     img = img.resize((PREVIEW_IMAGE_WIDTH, new_height), Image.ANTIALIAS)
 
-    if selected:
-        return add_border_to_image(img, SELECTED_PREVIEW_BORDER, COLOR_RED)
     return img
 
 
-def add_border_to_image(img, border_size, color):
+def add_border_to_image(img, border_size=SELECTED_PREVIEW_BORDER, color=COLOR_RED):
     background = Image.new(RGB_COLOR_MODE, (img.width + border_size, img.height + border_size), color)
     converted_img = img.convert(RGB_COLOR_MODE)
     half_border = int(border_size / 2.0)
