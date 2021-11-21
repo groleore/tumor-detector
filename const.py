@@ -24,3 +24,5 @@ EVENT_NEXT = 'next'
 EVENT_GO_TO = 'go_to'
 EVENT_OPEN_FILE = 'open_file'
 EVENT_OPEN_DIR = 'open_dir'
+
+DISPLAY_SCREEN = 'display'
