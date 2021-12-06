@@ -4,6 +4,7 @@ from file_utils import (
     read_dcm_image,
     read_dcm_image_as_preview,
     add_border_to_image,
+    read_dcm_properties,
 )
 from event_emitter import EventEmitter
 from singleton import Singleton
@@ -42,7 +43,7 @@ class AppState(EventEmitter, metaclass=Singleton):
         if not dir_path:
             return
 
-        self.file_list = read_files_from_dir(dir_path, SUPPORTED_FORMATS)
+        self.file_list = sorted(read_files_from_dir(dir_path, SUPPORTED_FORMATS))
         self._process_new_file_list()
 
     def _process_new_file_list(self):
@@ -62,6 +63,7 @@ class AppState(EventEmitter, metaclass=Singleton):
 
     def _read_current_image(self):
         self.current_image = read_dcm_image(self.current_file)
+        self.current_properties = read_dcm_properties(self.current_file)
 
     def _calculate_previews(self):
         start_index = self.index - self.index % PREVIEW_IMAGES_NUMBER
@@ -80,12 +82,8 @@ class AppState(EventEmitter, metaclass=Singleton):
         return self.index > 0
 
     def _update_image_position(self):
-        try:
-            self._read_current_image()
-            self.previews = self._calculate_previews()
-        except Exception as e:
-            print(e)
-            self.error = str(e)
+        self._read_current_image()
+        self.previews = self._calculate_previews()
 
     @property
     def current_file(self):

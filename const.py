@@ -2,7 +2,7 @@ APP_TITLE = 'Dicom Viewer'
 APP_VERSION = '1.0'
 
 SCREEN_HEIGHT = '700'
-SCREEN_WIDTH = '900'
+SCREEN_WIDTH = '1100'
 
 OPEN_FILE_TIP = 'Select .dcm file'
 OPEN_DIR_TIP = 'Select folder with .dcm files'

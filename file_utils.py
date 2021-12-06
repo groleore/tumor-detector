@@ -2,6 +2,8 @@ from pathlib import Path
 from pydicom import dcmread
 from PIL import Image
 from const import PREVIEW_IMAGE_WIDTH, COLOR_RED, SELECTED_PREVIEW_BORDER, RGB_COLOR_MODE
+from dicom_dict import DICOM_FIELDS
+import numpy as np
 
 
 def read_files_from_dir(dir_path, supported_formats=None, recursive=False):
@@ -26,6 +28,20 @@ def _read_files_from_dir(file_list, dir_path, supported_formats, recursive):
 def read_dcm_image(img_path):
     ds = dcmread(img_path)
     return Image.fromarray(ds.pixel_array)
+
+
+def read_dcm_properties(path):
+    ds = dcmread(path)
+    props = dict()
+    for key, value in DICOM_FIELDS.items():
+        if ds.get(key, None):
+            props[value] = getattr(ds, key)
+    return {
+        'File Name': Path(path).name,
+        'Min Pixel': np.amin(ds.pixel_array),
+        'Max Pixel': np.amax(ds.pixel_array),
+        **props,
+    }
 
 
 def read_dcm_image_as_preview(img_path):

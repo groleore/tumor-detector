@@ -1,5 +1,5 @@
 from tkinter import (
-    Label, ttk, Button, StringVar, Tk
+    Label, ttk, Button, StringVar, Tk, END, LEFT
 )
 from PIL import ImageTk
 from const import *
@@ -14,14 +14,20 @@ class DisplayScreen(Screen):
         self.canvas = None
         self.file_string = StringVar()
         self.previews: list = []
-        self.image_frame = ttk.Frame(self.app_root)
+        self.image_frame = ttk.Frame(self.app_root,  width=512, height=512)
+        self.properties_frame = ttk.Frame(self.app_root)
+        self.preview_frame = ttk.Frame(self.app_root)
 
     def render(self):
         self._render_previews()
         self._render_controls()
-        self._render_canvas()
+        self.preview_frame.pack()
 
-        self.image_frame.pack(side='left', fill='y', padx=50, pady=20)
+        self._render_canvas()
+        self.image_frame.pack(side=LEFT, fill='y', padx=20, pady=20)
+
+        self._render_properties()
+        self.properties_frame.pack(side=LEFT, fill='y', padx=10, pady=20)
 
         self.app_root.bind('<Left>', lambda event: self._prev())
         self.app_root.bind('<Right>', lambda event: self._next())
@@ -30,6 +36,7 @@ class DisplayScreen(Screen):
 
     def destroy(self):
         self.image_frame.destroy()
+        self.properties_frame.destroy()
         self.app_root.unbind('<Right>')
         self.app_root.unbind('<Left>')
 
@@ -37,13 +44,14 @@ class DisplayScreen(Screen):
         self._update_image()
         self._update_preview()
         self._update_file_position()
+        self._update_properties()
 
     @staticmethod
     def name():
         return DISPLAY_SCREEN
 
     def _render_controls(self):
-        control_frame = ttk.Frame(self.image_frame)
+        control_frame = ttk.Frame(self.preview_frame)
 
         btn = Button(control_frame, text='<', command=self._prev)
         btn.pack(side='left')
@@ -57,18 +65,27 @@ class DisplayScreen(Screen):
         control_frame.pack(side='top')
 
     def _render_previews(self):
-        preview_frame = ttk.Frame(self.image_frame)
+        preview_frame = ttk.Frame(self.preview_frame)
 
         self.previews = [Label(preview_frame) for _ in range(PREVIEW_IMAGES_NUMBER)]
         for idx, preview in enumerate(self.previews):
             preview.bind('<Button-1>', self._go_to(idx))
-            preview.pack(side='left')
+            preview.pack(side=LEFT)
 
-        preview_frame.pack(side='top')
+        preview_frame.pack()
 
     def _render_canvas(self):
         self.canvas = Label(self.image_frame)
-        self.canvas.pack(side="top", expand=1)
+        self.canvas.pack()
+
+    def _render_properties(self):
+        self.properties = ttk.Treeview(self.properties_frame,
+                                       columns=['Value'],
+                                       show='tree',
+                                       height=28,
+                                       )
+        self.properties.column('Value', width=300)
+        self.properties.pack()
 
     def _next(self):
         self._handle_event(EVENT_NEXT)
@@ -101,3 +118,9 @@ class DisplayScreen(Screen):
             tk_image = ImageTk.PhotoImage(preview_image) if preview_image else None
             preview_label.configure(image=tk_image)
             preview_label.image = tk_image
+
+    def _update_properties(self):
+        for i in self.properties.get_children():
+            self.properties.delete(i)
+        for key, value in self.app_state.current_properties.items():
+            self.properties.insert('', END, values=[value], text=key)
